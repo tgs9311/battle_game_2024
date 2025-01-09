@@ -240,10 +240,21 @@ void App::UpdateDynamicBuffer() {
 void App::CaptureInput() {
   InputData input_data;
   auto window = core_->GetWindow();
+
+  // 静态变量，用于存储上一帧的按键状态
+  static bool previous_key_down[kKeyRange] = {};
+
+  // 更新按键状态
   for (int i = 0; i < kKeyRange; i++) {
     input_data.key_down[i] = (glfwGetKey(window, i) == GLFW_PRESS);
+    input_data.key_pressed[i] = input_data.key_down[i] && !previous_key_down[i];
+    previous_key_down[i] = input_data.key_down[i];  // 更新上一帧的按键状态
   }
+
+  // 静态变量，用于存储上一帧的鼠标按钮状态
   static bool mouse_button_state[kMouseButtonRange] = {};
+
+  // 更新鼠标按钮状态
   for (int i = 0; i < kMouseButtonRange; i++) {
     if (i == GLFW_MOUSE_BUTTON_LEFT && ImGui::GetIO().WantCaptureMouse) {
       input_data.mouse_button_down[i] = false;
@@ -253,7 +264,7 @@ void App::CaptureInput() {
         (glfwGetMouseButton(window, i) == GLFW_PRESS);
     input_data.mouse_button_clicked[i] =
         (input_data.mouse_button_down[i] && !mouse_button_state[i]);
-    mouse_button_state[i] = input_data.mouse_button_down[i];
+    mouse_button_state[i] = input_data.mouse_button_down[i];  // 更新上一帧的鼠标按钮状态
   }
   double xpos, ypos;
   glfwGetCursorPos(window, &xpos, &ypos);
